@@ -1,7 +1,7 @@
 public class ExempleDisqueBloc {
 
     public static void main(String[] args) {
-        DisqueBloc disqueBloc = new DisqueBloc("maTable", 4, 10);
+        DisqueBloc disqueBloc = new DisqueBloc("maTable", 4, 100);
         FullScanDisqueBloc fullScan = new FullScanDisqueBloc(disqueBloc);
         disqueBloc.genereTable();
         fullScan.open();
