@@ -91,4 +91,7 @@ public class DisqueBloc {
     public String getNomFichier() {
         return nomFichier;
     }
+    public int getMaxTuples() {
+        return maxTuples;
+    }
 }

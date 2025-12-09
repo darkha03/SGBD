@@ -5,14 +5,14 @@ import java.security.NoSuchAlgorithmException;
 
 public class IndexHachageDynamique {
 
-    private Map<Integer, List<Tuple>> buckets = new HashMap<>();
+    private Map<Integer, List<Tuple>> buckets;
 
     private int hachage(int key, int depth) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(Integer.toString(key).getBytes());
         byte[] digest = md.digest();
-        int hashValue = Byte.toUnsignedInt(digest[0]);
-        int index = hashValue % 3;
+        int hashValue = digest[0] & 0xFF;
+        int index = hashValue % (1 << depth);
         return index;
     }
     
@@ -21,8 +21,11 @@ public class IndexHachageDynamique {
     }
 
     public void writeIndex(DisqueBloc disqueBloc) throws NoSuchAlgorithmException {
+        buckets = new HashMap<>();
         String nomFichier = disqueBloc.getNomFichier();
-        int maxTuples = 4;
+        int maxTuples = disqueBloc.getMaxTuples();
+
+        // Lire tous les tuples du DisqueBloc
         List<Tuple> tuples = new ArrayList<>();
         FullScanDisqueBloc fullScan = new FullScanDisqueBloc(disqueBloc);
         fullScan.open();
@@ -32,28 +35,39 @@ public class IndexHachageDynamique {
         }
         fullScan.close();
         int depth = 1;
+
+        // Distribuer les tuples dans les buckets
         for (Tuple tuple : tuples) {
             int key = tuple.val[0];
             int index = hachage(key, depth);
             buckets.putIfAbsent(index, new ArrayList<>());
             buckets.get(index).add(tuple);
             if (buckets.get(index).size() > maxTuples) {
-                depth++;
-                Map<Integer, List<Tuple>> newBuckets = new HashMap<>();
-                for (List<Tuple> bucketTuples : buckets.values()) {
-                    for (Tuple bucketTuple : bucketTuples) {
-                        int newIndex = hachage(bucketTuple.val[0], depth);
-                        newBuckets.putIfAbsent(newIndex, new ArrayList<>());
-                        newBuckets.get(newIndex).add(bucketTuple);
+                // Créer une copie pour éviter ConcurrentModificationException
+                List<Tuple> currentBucket = new ArrayList<>(buckets.get(index));
+                for (Tuple tempTuple : currentBucket) {
+                    int newDepth = Integer.toBinaryString(index).length() + 1;
+                    int newIndex = hachage(tempTuple.val[0], newDepth);
+                    if (newIndex != index) {
+                        buckets.putIfAbsent(newIndex, new ArrayList<>());
+                        buckets.get(newIndex).add(tempTuple);
+                        buckets.get(index).remove(tempTuple);
                     }
                 }
-                buckets = newBuckets;
             }
-            System.out.println("Tuple with key " + key + " goes to index " + index);
+        }
+
+        // Écrire les buckets dans les fichiers
+        for (Map.Entry<Integer, List<Tuple>> entry : buckets.entrySet()) {
+            int index = entry.getKey();
+            List<Tuple> bucketTuples = entry.getValue();
             String nomIndexBloc = nomFichier + ".index.bloc" + index;
-            try (FileWriter writer = new FileWriter( "data/" + nomIndexBloc, true)) {
-                for (int i = 0; i < tuple.size; i++) {
-                    writer.write(tuple.val[i]);
+            try (FileWriter writer = new FileWriter("data/" + nomIndexBloc, true)) {
+                for (Tuple tuple : bucketTuples) {
+                    for (int i = 0; i < tuple.size; i++) {
+                        writer.write(tuple.val[i]);
+                    }
+                    System.out.println("Written tuple with key " + tuple.val[0] + " to index " + index);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

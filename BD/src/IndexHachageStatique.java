@@ -21,6 +21,7 @@ public class IndexHachageStatique {
 
     public void writeIndex(DisqueBloc disqueBloc) throws java.security.NoSuchAlgorithmException {
         String nomFichier = disqueBloc.getNomFichier();
+        int maxTuples = disqueBloc.getMaxTuples();
         List<Tuple> tuples = new ArrayList<>();
 
         // Lire tous les tuples du DisqueBloc
@@ -40,10 +41,10 @@ public class IndexHachageStatique {
             System.out.println("Tuple with key " + key + " goes to index " + index);
             String nomIndexBloc = nomFichier + ".index.bloc" + index;
             buckets.put(index, buckets.getOrDefault(index, 0) + 1);
-            if (buckets.get(index) > 4) {
+            if (buckets.get(index) > maxTuples) {
                 System.out.println("Warning: Bucket " + index + " exceeds capacity!");
             }
-            int nextIndex = buckets.get(index) / 4;
+            int nextIndex = buckets.get(index) / maxTuples;
             if (nextIndex > 0) {
                 System.out.println("Bucket " + index + " needs overflow block: " + nextIndex);
                 nomIndexBloc = nomFichier + ".index.bloc" + index + "." + nextIndex;

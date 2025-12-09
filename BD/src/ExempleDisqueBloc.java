@@ -1,7 +1,7 @@
 public class ExempleDisqueBloc {
 
     public static void main(String[] args) {
-        DisqueBloc disqueBloc = new DisqueBloc("maTable", 4, 100);
+        DisqueBloc disqueBloc = new DisqueBloc("maTable", 4, 10);
         FullScanDisqueBloc fullScan = new FullScanDisqueBloc(disqueBloc);
         disqueBloc.genereTable();
         fullScan.open();
@@ -10,7 +10,7 @@ public class ExempleDisqueBloc {
             System.out.println(t);
         }
         fullScan.close();
-        IndexHachageStatique indexHachage = new IndexHachageStatique();
+        IndexHachageDynamique indexHachage = new IndexHachageDynamique();
         try {
             indexHachage.writeIndex(disqueBloc);
         } catch (java.security.NoSuchAlgorithmException e) {
