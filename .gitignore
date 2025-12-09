@@ -1,5 +1,4 @@
 *.class
 .settings/
 bin/
-.project
 data/
