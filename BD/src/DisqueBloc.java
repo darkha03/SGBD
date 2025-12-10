@@ -15,7 +15,11 @@ public class DisqueBloc {
         this.nombreTuples = nombreTuples;
     }
 
-    public void genereTable(){
+    public void genereTable() {
+        File folder = new File("data");
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
         int nbBlocs = (int) Math.ceil((double) nombreTuples / maxTuples);
         for (int i = 0; i < nbBlocs; i++) {
             String nomBloc = nomFichier + ".bloc" + (i + 1);
@@ -86,9 +90,11 @@ public class DisqueBloc {
         }
         return tuplesList;
     }
+
     public int getComteurLecture() {
         return comteurLecture;
     }
+
     public String getNomFichier() {
         return nomFichier;
     }

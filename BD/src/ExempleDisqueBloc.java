@@ -10,12 +10,20 @@ public class ExempleDisqueBloc {
             System.out.println(t);
         }
         fullScan.close();
-        IndexHachageStatique indexHachage = new IndexHachageStatique();
+        /*
+         * IndexHachageStatique indexStatHachage = new IndexHachageStatique();
+         * try {
+         * indexStatHachage.writeIndex(disqueBloc);
+         * } catch (java.security.NoSuchAlgorithmException e) {
+         * e.printStackTrace();
+         * }
+         */
+        IndexHachageDynamique indexDynHachage = new IndexHachageDynamique();
         try {
-            indexHachage.writeIndex(disqueBloc);
+            indexDynHachage.writeIndex(disqueBloc);
         } catch (java.security.NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
-    
+
 }
