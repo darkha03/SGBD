@@ -17,11 +17,13 @@ public class IndexHachageDynamique {
         }
     }
 
-    private List<Bucket> directory = new ArrayList<>();
-    private int globalDepth = 1;
-    private final int MAX_TUPLES = 4;
+    private List<Bucket> directory;
+    private int globalDepth;
+    private int maxTuples;
 
     public IndexHachageDynamique() {
+        this.directory = new ArrayList<>();
+        this.globalDepth = 1;
         directory.add(new Bucket(1));
         directory.add(new Bucket(1));
     }
@@ -41,31 +43,41 @@ public class IndexHachageDynamique {
 
     public void writeIndex(DisqueBloc disqueBloc) throws NoSuchAlgorithmException {
         String nomFichier = disqueBloc.getNomFichier();
-        List<Tuple> tuples = new ArrayList<>();
+        this.maxTuples = disqueBloc.getMaxTuples();
+
+        // Lire tous les tuples du DisqueBloc
+        List<Tuple> allTuples = new ArrayList<>();
         FullScanDisqueBloc fullScan = new FullScanDisqueBloc(disqueBloc);
         fullScan.open();
         Tuple t;
         while ((t = fullScan.next()) != null) {
-            tuples.add(t);
+            allTuples.add(t);
         }
         fullScan.close();
-        for (Tuple tuple : tuples) {
+
+        // Distribuer les tuples dans les buckets
+        for (Tuple tuple : allTuples) {
             insertTuple(tuple);
         }
+
         Set<Bucket> processedBuckets = new HashSet<>();
+
         for (int i = 0; i < directory.size(); i++) {
             Bucket bucket = directory.get(i);
 
             if (processedBuckets.contains(bucket)) {
                 continue;
             }
+
             String nomIndexBloc = nomFichier + ".index.bucket" + bucket.id;
+
             try (FileWriter writer = new FileWriter("data/" + nomIndexBloc, false)) {
                 for (Tuple tuple : bucket.tuples) {
                     for (int k = 0; k < tuple.size; k++) {
                         writer.write(tuple.val[k] + (k == tuple.size - 1 ? "" : ","));
                     }
                     writer.write("\n");
+                    System.out.println("Written tuple key " + tuple.val[0] + " to bucket " + bucket.id);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -79,7 +91,7 @@ public class IndexHachageDynamique {
         int dirIndex = hachage(key, globalDepth);
         System.out.println("Tuple with key " + key + " goes to directory with index " + dirIndex);
         Bucket bucket = directory.get(dirIndex);
-        if (bucket.tuples.size() < MAX_TUPLES) {
+        if (bucket.tuples.size() < this.maxTuples) {
             bucket.tuples.add(tuple);
         } else {
             splitBucket(bucket, tuple);

@@ -1,5 +1,4 @@
 import java.io.*;
-import java.nio.file.Path;
 import java.util.List;
 
 public class DisqueBloc {
@@ -97,5 +96,8 @@ public class DisqueBloc {
 
     public String getNomFichier() {
         return nomFichier;
+    }
+    public int getMaxTuples() {
+        return maxTuples;
     }
 }
