@@ -48,8 +48,17 @@ public class IndexHachageDynamique {
         return new DisqueBloc(nomIndexBloc, maxTuples, 0);
     }
 
+    public int getBucketId(int index) {
+        Bucket bucket = directory.get(index);
+        return bucket.id;
+    }
+
     public int getGlobalDepth() {
         return globalDepth;
+    }
+
+    public int getDirectorySize() {
+        return directory.size();
     }
 
     public void writeIndex(DisqueBloc disqueBloc) throws NoSuchAlgorithmException {
@@ -82,7 +91,7 @@ public class IndexHachageDynamique {
 
             String nomIndexBloc = nomFichier + ".index.bloc" + bucket.id;
 
-            try (FileWriter writer = new FileWriter("data/" + nomIndexBloc + ".bloc1", false)) {
+            try (FileWriter writer = new FileWriter("data/" + nomIndexBloc, false)) {
                 // Écrire les en-têtes du bucket
                 writer.write(bucket.tuples.size());
                 writer.write(bucket.tuples.isEmpty() ? 0 : bucket.tuples.get(0).size);

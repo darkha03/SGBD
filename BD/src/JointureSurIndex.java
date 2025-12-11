@@ -33,7 +33,8 @@ public class JointureSurIndex implements Operateur {
             try {
                 int blocIndex = indexHachage.getDisqueBlocIndex(valeurRecherchee, indexHachage.getGlobalDepth());
                 DisqueBloc disqueBloc = indexHachage.getDisqueBloc(blocIndex);
-                scanDroit = new FullScanDisqueBloc(disqueBloc);
+                int bucketId = indexHachage.getBucketId(blocIndex);
+                scanDroit = new FullScanDisqueBloc(disqueBloc, bucketId - 1);
                 scanDroit.open();
 
                 Tuple tupleDroit;
