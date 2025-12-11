@@ -1,17 +1,19 @@
 import java.io.*;
 import java.util.List;
+import java.util.ArrayList;
 
 public class DisqueBloc {
     private int maxTuples = 4;
     private int nombreTuples = 0;
     private int nombreColonnes;
     private String nomFichier;
-    private int comteurLecture = 0;
+    private int compteurLecture = 0;
 
     public DisqueBloc(String nomFichier, int nombreColonnes, int nombreTuples) {
         this.nomFichier = nomFichier;
         this.nombreColonnes = nombreColonnes;
         this.nombreTuples = nombreTuples;
+        this.compteurLecture = 0; // Initialisation explicite
     }
 
     public void genereTable() {
@@ -22,42 +24,43 @@ public class DisqueBloc {
         int nbBlocs = (int) Math.ceil((double) nombreTuples / maxTuples);
         for (int i = 0; i < nbBlocs; i++) {
             String nomBloc = nomFichier + ".bloc" + (i + 1);
-            try (FileWriter writer = new FileWriter("data/" + nomBloc)) {
+            try (DataOutputStream dos = new DataOutputStream(new FileOutputStream("data/" + nomBloc))) {
                 int tuplesInThisBloc = Math.min(maxTuples, nombreTuples - i * maxTuples);
-                int prochainBloc = (i < nbBlocs - 1) ? i + 1 : 0;
+                int prochainBloc = (i < nbBlocs - 1) ? (i + 2) : 0; // i+2 car les blocs commencent à 1
                 // Ecriture des entetes
-                writer.write(tuplesInThisBloc);
-                writer.write(nombreColonnes);
-                writer.write(prochainBloc);
+                dos.writeInt(nombreColonnes);
+                dos.writeInt(tuplesInThisBloc);
+                dos.writeInt(prochainBloc);
                 for (int j = 0; j < tuplesInThisBloc; j++) {
                     for (int k = 0; k < nombreColonnes; k++) {
                         int valeur = (int) (Math.random() * 100);
-                        writer.write(valeur);
+                        dos.writeInt(valeur);
                     }
                 }
+                System.out.println("Bloc " + (i + 1) + " créé avec " + tuplesInThisBloc + " tuples");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
+        System.out.println("Table " + nomFichier + " générée avec " + nbBlocs + " blocs");
     }
 
     public Tuple lireTuple(String nomFichier, int numeroBloc, int indexTuple) {
-        String nomBloc = nomFichier + ".bloc" + (numeroBloc + 1);
+        String nomBloc = nomFichier + ".bloc" + numeroBloc;
         Tuple tuple = null;
-        try (FileReader reader = new FileReader("data/" + nomBloc)) {
-            int nombreTuplesDansBloc = reader.read();
-            int nombreColonnesDansBloc = reader.read();
-            int prochainBloc = reader.read();
+        try (DataInputStream dis = new DataInputStream(new FileInputStream("data/" + nomBloc))) {
+            int nombreColonnesDansBloc = dis.readInt();
+            int nombreTuplesDansBloc = dis.readInt();
+            int prochainBloc = dis.readInt();
             if (indexTuple < nombreTuplesDansBloc) {
                 tuple = new Tuple(nombreColonnesDansBloc);
                 for (int i = 0; i < indexTuple; i++) {
                     for (int j = 0; j < nombreColonnesDansBloc; j++) {
-                        reader.read(); // Skip values
+                        dis.readInt(); // Skip values
                     }
                 }
                 for (int j = 0; j < nombreColonnesDansBloc; j++) {
-                    tuple.val[j] = reader.read();
+                    tuple.val[j] = dis.readInt();
                 }
             }
         } catch (IOException e) {
@@ -67,37 +70,50 @@ public class DisqueBloc {
     }
 
     public List<Tuple> lireBloc(String nomFichier, int numeroBloc) {
-        String nomBloc = nomFichier + ".bloc" + (numeroBloc + 1);
-        List<Tuple> tuplesList = new java.util.ArrayList<>();
-        try (FileReader reader = new FileReader("data/" + nomBloc)) {
-            int nombreTuplesDansBloc = reader.read();
-            int nombreColonnesDansBloc = reader.read();
-            int prochainBloc = reader.read();
+        String nomBloc = nomFichier + ".bloc" + numeroBloc;
+        List<Tuple> tuplesList = new ArrayList<>();
+        try (DataInputStream dis = new DataInputStream(new FileInputStream("data/" + nomBloc))) {
+            int nombreColonnesDansBloc = dis.readInt();
+            int nombreTuplesDansBloc = dis.readInt();
+            int prochainBloc = dis.readInt();
             for (int i = 0; i < nombreTuplesDansBloc; i++) {
                 Tuple tuple = new Tuple(nombreColonnesDansBloc);
                 for (int j = 0; j < nombreColonnesDansBloc; j++) {
-                    tuple.val[j] = reader.read();
+                    tuple.val[j] = dis.readInt();
                 }
                 tuplesList.add(tuple);
             }
-            this.comteurLecture++;
+            this.compteurLecture++;
             if (prochainBloc != 0) {
-                lireBloc(nomFichier, numeroBloc + 1);
+                tuplesList.addAll(lireBloc(nomFichier, prochainBloc));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Erreur lecture bloc " + numeroBloc + ": " + e.getMessage());
         }
         return tuplesList;
     }
 
-    public int getComteurLecture() {
-        return comteurLecture;
+    public int getCompteurLecture() {
+        return compteurLecture;
+    }
+
+    public void incrementerCompteurLecture() {
+        this.compteurLecture++;
+    }
+
+    public void resetCompteurLecture() {
+        this.compteurLecture = 0;
     }
 
     public String getNomFichier() {
         return nomFichier;
     }
+
     public int getMaxTuples() {
         return maxTuples;
+    }
+
+    public int getNombreColonnes() {
+        return nombreColonnes;
     }
 }
