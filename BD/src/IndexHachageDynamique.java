@@ -44,8 +44,8 @@ public class IndexHachageDynamique {
 
     public DisqueBloc getDisqueBloc(int index) {
         Bucket bucket = directory.get(index);
-        String nomIndexBloc = nomFichier + ".index.bloc" + bucket.id;
-        return new DisqueBloc(nomIndexBloc, maxTuples, 0);
+        String nomIndexBase = nomFichier + ".index";
+        return new DisqueBloc(nomIndexBase, maxTuples, 0);
     }
 
     public int getBucketId(int index) {
@@ -91,16 +91,17 @@ public class IndexHachageDynamique {
 
             String nomIndexBloc = nomFichier + ".index.bloc" + bucket.id;
 
-            try (FileWriter writer = new FileWriter("data/" + nomIndexBloc, false)) {
+            try (DataOutputStream dos = new DataOutputStream(new FileOutputStream("data/" + nomIndexBloc))) {
                 // Écrire les en-têtes du bucket
-                writer.write(bucket.tuples.size());
-                writer.write(bucket.tuples.isEmpty() ? 0 : bucket.tuples.get(0).size);
-                writer.write(0);
-                
+                int nombreColonnes = bucket.tuples.isEmpty() ? 0 : bucket.tuples.get(0).size;
+                dos.writeInt(nombreColonnes);
+                dos.writeInt(bucket.tuples.size());
+                dos.writeInt(0); // prochainBloc = 0 (pas de bloc suivant)
+
                 // Écrire les tuples
                 for (Tuple tuple : bucket.tuples) {
                     for (int k = 0; k < tuple.size; k++) {
-                        writer.write(tuple.val[k]);
+                        dos.writeInt(tuple.val[k]);
                     }
                 }
             } catch (IOException e) {

@@ -70,25 +70,27 @@ public class DisqueBloc {
     }
 
     public List<Tuple> lireBloc(String nomFichier, int numeroBloc) {
-        String nomBloc = nomFichier + ".bloc" + numeroBloc;
+        int currentBloc = numeroBloc;
         List<Tuple> tuplesList = new ArrayList<>();
-        try (DataInputStream dis = new DataInputStream(new FileInputStream("data/" + nomBloc))) {
-            int nombreColonnesDansBloc = dis.readInt();
-            int nombreTuplesDansBloc = dis.readInt();
-            int prochainBloc = dis.readInt();
-            for (int i = 0; i < nombreTuplesDansBloc; i++) {
-                Tuple tuple = new Tuple(nombreColonnesDansBloc);
-                for (int j = 0; j < nombreColonnesDansBloc; j++) {
-                    tuple.val[j] = dis.readInt();
+        while (currentBloc != 0) {
+            String nomBloc = nomFichier + ".bloc" + currentBloc;
+            try (DataInputStream dis = new DataInputStream(new FileInputStream("data/" + nomBloc))) {
+                int nombreColonnesDansBloc = dis.readInt();
+                int nombreTuplesDansBloc = dis.readInt();
+                int prochainBloc = dis.readInt();
+                for (int i = 0; i < nombreTuplesDansBloc; i++) {
+                    Tuple tuple = new Tuple(nombreColonnesDansBloc);
+                    for (int j = 0; j < nombreColonnesDansBloc; j++) {
+                        tuple.val[j] = dis.readInt();
+                    }
+                    tuplesList.add(tuple);
                 }
-                tuplesList.add(tuple);
+                this.compteurLecture++;
+                currentBloc = prochainBloc;
+            } catch (IOException e) {
+                System.err.println("Erreur lecture bloc " + currentBloc + ": " + e.getMessage());
+                break;
             }
-            this.compteurLecture++;
-            if (prochainBloc != 0) {
-                tuplesList.addAll(lireBloc(nomFichier, prochainBloc));
-            }
-        } catch (IOException e) {
-            System.err.println("Erreur lecture bloc " + numeroBloc + ": " + e.getMessage());
         }
         return tuplesList;
     }

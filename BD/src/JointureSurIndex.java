@@ -8,8 +8,8 @@ public class JointureSurIndex implements Operateur {
     private FullScanDisqueBloc scanDroit;
 
     public JointureSurIndex(Operateur operateurGauche, Operateur operateurDroit,
-                            IndexHachageDynamique indexHachage,
-                            int colonneGauche, int colonneDroit) {
+            IndexHachageDynamique indexHachage,
+            int colonneGauche, int colonneDroit) {
         this.operateurGauche = operateurGauche;
         this.operateurDroit = operateurDroit;
         this.indexHachage = indexHachage;
@@ -27,14 +27,14 @@ public class JointureSurIndex implements Operateur {
     @Override
     public Tuple next() {
         while ((tupleCourantGauche = operateurGauche.next()) != null) {
-            
+
             int valeurRecherchee = tupleCourantGauche.val[colonneGauche];
-            
+
             try {
                 int blocIndex = indexHachage.getDisqueBlocIndex(valeurRecherchee, indexHachage.getGlobalDepth());
                 DisqueBloc disqueBloc = indexHachage.getDisqueBloc(blocIndex);
                 int bucketId = indexHachage.getBucketId(blocIndex);
-                scanDroit = new FullScanDisqueBloc(disqueBloc, bucketId - 1);
+                scanDroit = new FullScanDisqueBloc(disqueBloc, bucketId);
                 scanDroit.open();
 
                 Tuple tupleDroit;
