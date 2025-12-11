@@ -20,6 +20,7 @@ public class IndexHachageDynamique {
     private List<Bucket> directory;
     private int globalDepth;
     private int maxTuples;
+    private String nomFichier;
 
     public IndexHachageDynamique() {
         this.directory = new ArrayList<>();
@@ -41,8 +42,18 @@ public class IndexHachageDynamique {
         return hachage(key, depth);
     }
 
+    public DisqueBloc getDisqueBloc(int index) {
+        Bucket bucket = directory.get(index);
+        String nomIndexBloc = nomFichier + ".index.bloc" + bucket.id;
+        return new DisqueBloc(nomIndexBloc, maxTuples, 0);
+    }
+
+    public int getGlobalDepth() {
+        return globalDepth;
+    }
+
     public void writeIndex(DisqueBloc disqueBloc) throws NoSuchAlgorithmException {
-        String nomFichier = disqueBloc.getNomFichier();
+        nomFichier = disqueBloc.getNomFichier();
         this.maxTuples = disqueBloc.getMaxTuples();
 
         // Lire tous les tuples du DisqueBloc
@@ -69,15 +80,19 @@ public class IndexHachageDynamique {
                 continue;
             }
 
-            String nomIndexBloc = nomFichier + ".index.bucket" + bucket.id;
+            String nomIndexBloc = nomFichier + ".index.bloc" + bucket.id;
 
-            try (FileWriter writer = new FileWriter("data/" + nomIndexBloc, false)) {
+            try (FileWriter writer = new FileWriter("data/" + nomIndexBloc + ".bloc1", false)) {
+                // Écrire les en-têtes du bucket
+                writer.write(bucket.tuples.size());
+                writer.write(bucket.tuples.isEmpty() ? 0 : bucket.tuples.get(0).size);
+                writer.write(0);
+                
+                // Écrire les tuples
                 for (Tuple tuple : bucket.tuples) {
                     for (int k = 0; k < tuple.size; k++) {
-                        writer.write(tuple.val[k] + (k == tuple.size - 1 ? "" : ","));
+                        writer.write(tuple.val[k]);
                     }
-                    writer.write("\n");
-                    System.out.println("Written tuple key " + tuple.val[0] + " to bucket " + bucket.id);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

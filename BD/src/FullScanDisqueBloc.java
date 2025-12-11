@@ -9,8 +9,13 @@ public class FullScanDisqueBloc implements Operateur {
     private int prochainBloc = 0;
 
     public FullScanDisqueBloc(DisqueBloc disqueBloc) {
+        this(disqueBloc, 0);
+    }
+
+    public FullScanDisqueBloc(DisqueBloc disqueBloc, int currentBloc) {
         this.disqueBloc = disqueBloc;
         this.nomFichier = disqueBloc.getNomFichier();
+        this.currentBloc = currentBloc;
     }
 
     @Override
