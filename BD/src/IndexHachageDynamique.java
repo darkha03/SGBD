@@ -90,7 +90,6 @@ public class IndexHachageDynamique {
             }
 
             String nomIndexBloc = nomFichier + ".index.bloc" + bucket.id;
-            String nomIndexBloc = nomFichier + ".index.bloc" + bucket.id;
 
             try (FileWriter writer = new FileWriter("data/" + nomIndexBloc, false)) {
                 // Écrire les en-têtes du bucket
