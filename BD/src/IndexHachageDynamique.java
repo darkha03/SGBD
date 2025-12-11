@@ -69,7 +69,7 @@ public class IndexHachageDynamique {
                 continue;
             }
 
-            String nomIndexBloc = nomFichier + ".index.bucket" + bucket.id;
+            String nomIndexBloc = nomFichier + ".index.bloc" + bucket.id;
 
             try (FileWriter writer = new FileWriter("data/" + nomIndexBloc, false)) {
                 for (Tuple tuple : bucket.tuples) {
@@ -77,7 +77,6 @@ public class IndexHachageDynamique {
                         writer.write(tuple.val[k] + (k == tuple.size - 1 ? "" : ","));
                     }
                     writer.write("\n");
-                    System.out.println("Written tuple key " + tuple.val[0] + " to bucket " + bucket.id);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
