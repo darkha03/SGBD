@@ -18,12 +18,14 @@ public class ExempleDisqueBloc {
          * e.printStackTrace();
          * }
          */
-        IndexHachageDynamique indexDynHachage = new IndexHachageDynamique();
-        try {
-            indexDynHachage.writeIndex(disqueBloc);
-        } catch (java.security.NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+        /*
+         * IndexHachageDynamique indexDynHachage = new IndexHachageDynamique();
+         * try {
+         * indexDynHachage.writeIndex(disqueBloc);
+         * } catch (java.security.NoSuchAlgorithmException e) {
+         * e.printStackTrace();
+         * }
+         */
     }
 
 }

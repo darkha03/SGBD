@@ -141,8 +141,17 @@ public class IndexHachageDynamique {
             }
         }
         for (Tuple t : allTuples) {
-            int index = hachage(t.val[0], globalDepth);
-            directory.get(index).tuples.add(t);
+            insererApresSplit(t);
+        }
+    }
+
+    private void insererApresSplit(Tuple tuple) throws NoSuchAlgorithmException {
+        int dirIndex = hachage(tuple.val[0], globalDepth);
+        Bucket bucket = directory.get(dirIndex);
+        if (bucket.tuples.size() < this.maxTuples) {
+            bucket.tuples.add(tuple);
+        } else {
+            splitBucket(bucket, tuple);
         }
     }
 
